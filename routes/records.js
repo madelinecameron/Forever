@@ -1,11 +1,10 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var gridFS = require('gridfs-stream');
-var conf = require('../conf.json');
 var fs = require('fs');
 var router = express.Router();
 
-var connection = mongoose.createConnection('mongodb://%USER%:%PASS%@ds037087.mongolab.com:37087/forever'.replace('%USER%', conf.db.user).replace('%PASS%', conf.db.pass));
+var connection = mongoose.createConnection('mongodb://%USER%:%PASS%@ds037087.mongolab.com:37087/forever'.replace('%USER%', process.env.DB_USER).replace('%PASS%', process.env.DB_PASS));
 console.log("Database connected successfully!");
 var gridConn;
 
