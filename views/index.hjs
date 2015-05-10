@@ -1,11 +1,54 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>{{ title }}</title>
+<head>
+    <title>Forever</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1>{{ title }}</h1>
-    <p>Welcome to {{ title }}</p>
-  </body>
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<div id="banner" class="row">
+    <div class="col-md-12">
+        <div class="page-header">
+            <h1 style="margin-left:5px">Forever</h1>
+        </div>
+    </div>
+</div>
+<div id="body" class="row" style="margin-left:15px;">
+    <div class="col-md-8">
+        <div>
+            <h3 style="margin-left:5px;">What is this?</h4>
+                <p style="margin-left:35px;">
+                  Permanant, continual and redundant storage of data in a completely public format. Forever can be used to memorialize an entire person's life or even a mass-storage device for any documents you like.
+                </p>
+        </div>
+        <br>
+        <div>
+            <h3 style="margin-left:5px;">Why?</h4>
+                <p style="margin-left:35px;">
+                    Data is important and is only becoming more important. Paying one price today to have your data exist for eternity is a small price.
+                </p>
+        </div>
+        <br>
+        <div>
+            <h3 style="margin-left:5px;">Who did this and how can I contact them?</h4>
+                <p style="margin-left:35px;">
+                    <a href="http://twitter.com/Madamelic">Twitter</a><br>
+                    <a href="mailto:madeline@madelinecameron.net">Email</a><br>
+                    <a href="http://github.com/MadelineCameron">GitHub</a><br>
+                </p>
+        </div>
+        <br>
+    </div>
+    <div class="col-md-4">
+        <h3>Ready?</h3>
+        <div>
+            <a class="btn btn-primary btn-lg" href="/records">Upload something!</a>
+        </div>
+        <br>
+    </div>
+</div>
+</body>
 </html>
