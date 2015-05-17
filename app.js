@@ -5,9 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var multer = require('multer');
+var users = require('user-management');
 
 var routes = require('./routes/index');
 var records = require('./routes/records');
+var user = require('./routes/user');
 
 var app = express();
 
@@ -29,6 +31,7 @@ app.use(multer({
 
 app.use('/', routes);
 app.use('/records', records);
+app.use('/user', user);
 
 
 // catch 404 and forward to error handler

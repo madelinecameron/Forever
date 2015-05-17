@@ -1,3 +1,0 @@
-<body>
-    <p>Current price: ${{data_price}} / GB</p>
-</body>
