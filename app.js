@@ -5,11 +5,15 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var multer = require('multer');
-var users = require('user-management');
+var cookies = require('cookies');
+var passport = require('passport');
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var passport_mongoose = require('passport-local-mongoose');
 
 var routes = require('./routes/index');
 var records = require('./routes/records');
-var user = require('./routes/user');
+//var user = require('./routes/user');
 
 var app = express();
 
@@ -25,13 +29,25 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.session());
 app.use(multer({
   dest: './temp'
 }));
+app.use(cookies.express());
+app.use(passport.initialize());
+app.use(passport.session());
+
+var User = new Schema({});
+User.plugin(passport_mongoose);
+
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use('/', routes);
 app.use('/records', records);
-app.use('/user', user);
+//app.use('/user', user);
 
 
 // catch 404 and forward to error handler

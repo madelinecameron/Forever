@@ -9,10 +9,21 @@
 <script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-<div id="banner" class="row">
+<div id="banner" class="row page-header">
     <div class="col-md-12">
-        <div class="page-header">
+        <div>
             <h1 style="margin-left:5px">Forever</h1>
+        </div>
+        <div class="col-md-4" style="float:right;margin-left:10px">
+            <div id="userbox">
+                {{#signedIn}}
+                    <a href="/profile">Profile</a>
+                {{/signedIn}}
+                {{^signedIn}}
+                    <a href="/login">Login</a>
+                    <a href="/register">Register</a>
+                {{/signedIn}}
+            </div>
         </div>
     </div>
 </div>
@@ -29,15 +40,6 @@
             <h3 style="margin-left:5px;">Why?</h4>
                 <p style="margin-left:35px;">
                     Data is important and is only becoming more important. Paying one price today to have your data exist for eternity is a small price.
-                </p>
-        </div>
-        <br>
-        <div>
-            <h3 style="margin-left:5px;">Who did this and how can I contact them?</h4>
-                <p style="margin-left:35px;">
-                    <a href="http://twitter.com/Madamelic">Twitter</a><br>
-                    <a href="mailto:madeline@madelinecameron.net">Email</a><br>
-                    <a href="http://github.com/MadelineCameron">GitHub</a><br>
                 </p>
         </div>
         <br>
