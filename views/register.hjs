@@ -3,24 +3,24 @@
         <title>{{title}}</title>
     </head>
     <body>
-        <form method="POST">
+        <form method="post" id="register">
             <div class="input-group">
-                <input type="text" id="username" class="form-control" placeholder="Username">
+                <input type="text" name="username" class="form-control" placeholder="Username">
             </div>
 
             <div class="input-group">
-                <input type="password" id="password" class="form-control" placeholder="Password">
+                <input type="password" name="password" class="form-control" placeholder="Password">
                 <span class="input-group-addon">
                     <input type="checkbox" aria-label="Show password">
                 </span>
             </div>
 
             <div class="input-group">
-                <input type="email" id="email" class="form-control" placeholder="Email">
+                <input type="email" name="email" class="form-control" placeholder="Email">
             </div>
 
             <div class="input-group">
-                <button formmethod="POST">Register</button>
+                <button type="submit">Register</button>
             </div>
         </form>
     </body>

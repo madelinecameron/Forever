@@ -5,15 +5,17 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var multer = require('multer');
-var cookies = require('cookies');
 var passport = require('passport');
 var mongoose = require('mongoose');
+var session = require('express-session');
 var Schema = mongoose.Schema;
 var passport_mongoose = require('passport-local-mongoose');
+var LocalStrategy = require('passport-local').Strategy;
 
 var routes = require('./routes/index');
 var records = require('./routes/records');
-//var user = require('./routes/user');
+
+var User = require('./models/User');
 
 var app = express();
 
@@ -24,21 +26,20 @@ app.set('view engine', 'hjs');
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
+app.use(bodyParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.session());
+app.use(session({
+  secret: 'test change in production'
+}));
 app.use(multer({
   dest: './temp'
 }));
-app.use(cookies.express());
 app.use(passport.initialize());
 app.use(passport.session());
-
-var User = new Schema({});
-User.plugin(passport_mongoose);
 
 passport.use(new LocalStrategy(User.authenticate()));
 
