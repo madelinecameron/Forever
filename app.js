@@ -48,6 +48,7 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use('/', routes);
 app.use('/records', records);
+app.use('/public', express.static('public'));
 //app.use('/user', user);
 
 

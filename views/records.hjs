@@ -1,12 +1,185 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
 
+        <style>
+            body {
+                margin: 8px;
+            }
+            .modal-dialog {
+                width: 350px;
+            }
+            .modal-header {
+                border: none;
+                padding: 0;
+            }
+            .modal-content {
+                padding: 10px;
+            }
+        </style>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://js.stripe.com/v2/"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <script type="application/javascript">
+            function status(message) {
+                $('#status').text(message);
+            }
+
+            $(document).ready(function() {
+
+                // Check to see when a user has selected a file
+                var timerId;
+                timerId = setInterval(function() {
+                    if($('#upload').val() !== '') {
+                        clearInterval(timerId);
+
+                        status('uploading the file ...');
+
+                        uploadFile();
+
+                        $('#checkout').modal('toggle');
+                        //return false;
+                    }
+                }, 500);
+
+            });
+
+            function uploadFile() {
+                var fd = new FormData();
+                fd.append("upload", document.getElementById('upload').files[0]);
+                var xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener("progress", uploadProgress, false);
+                xhr.addEventListener("load", uploadComplete, false);
+                xhr.addEventListener("error", uploadFailed, false);
+                xhr.addEventListener("abort", uploadCanceled, false);
+                xhr.open("POST", "/records");
+                xhr.send(fd);
+            }
+
+            function uploadProgress(evt) {
+                if (evt.lengthComputable) {
+                    var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+                    status(percentComplete.toString() + "%");
+                }
+                else {
+                    status("unable to compute");
+                }
+            }
+
+            function uploadComplete(evt) {
+                /* This event is raised when the server send back a response */
+                status('Success!');
+            }
+
+            function uploadFailed(evt) {
+                status("There was an error attempting to upload the file.");
+            }
+
+            function uploadCanceled(evt) {
+                status("The upload has been canceled by the user or the browser dropped the connection.");
+            }
+        </script>
     </head>
     <body>
-        <form method="POST" enctype="multipart/form-data" action="/records">
-            <input type="file" name="file"/><br/>
-            <button type="submit">Submit</button>
+        <form id="uploadForm"
+              enctype="multipart/form-data"
+              action="/records"
+              method="post">
+            <input type="file" id="upload" name="upload" />
         </form>
+
+        <span id="status" />
+
+        <div class="modal fade" id="checkout">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form id="form" action="/charge" method="POST" class="form-horizontal">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-credit-card"></span></span>
+                                        <input id="card-num" class="form-control" type="text" size="16" placeholder="Card number" autofocus="autofocus" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                                        <input id="card-exp" class="form-control" type="text" size="5" placeholder="MM/YY" />
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+                                        <input id="card-cvc" class="form-control" type="text" size="4" placeholder="CVC" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button id="submit" type="button" class="btn btn-primary col-sm-12"
+                                data-progress-text="<span class='glyphicon glyphicon-refresh fa-spin'></span>"
+                                data-success-text="<span class='glyphicon glyphicon-ok'></span>"
+                                >
+                            Pay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            Stripe.setPublishableKey('pk_MY_PUBLISHABLE_KEY');
+
+            var $btn = $('#submit');
+            $btn.on('click', function() {
+                $btn.prop('disabled', true);
+                $btn.button('progress');
+
+                var cardNum = $('#card-num').val();
+                var cardExp = $('#card-exp').val().split('/');
+                var cardCVC = $('#card-cvc').val();
+
+                // First submit the card information to Stripe to get back a token
+                Stripe.card.createToken({
+                    number: cardNum,
+                    exp_month: cardExp[0],
+                    exp_year: cardExp[1],
+                    cvc: cardCVC
+                }, function(status, response) {
+                    var $form = $('#form');
+                    var token = response.id;
+
+                    // Save the token into a hidden input field
+                    $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+
+                    // Now submit the form to our server so it can make the charge against the token
+                    $form.get(0).submit();
+
+                    // All done!
+                    $btn.addClass('btn-success').removeClass('btn-primary');
+                    $btn.button('success');
+                    setTimeout(function() {
+                        $('#checkout').modal('hide');
+                    }, 250);
+                });
+
+                return false;
+            });
+        </script>
     </body>
 </html>
