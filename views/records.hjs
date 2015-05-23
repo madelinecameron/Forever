@@ -12,7 +12,7 @@
             $(document).ready(function() {
                 document.getElementById('upload').addEventListener('change', function() {
                     $('#checkout').on('hidden.bs.modal', function(e) {
-                        $('#upload').val('');
+                        //$('#upload').val('');
                     }).modal('hide');
 
                     $('#checkout').on('shown.bs.modal', function() {
@@ -87,7 +87,15 @@
             function uploadProgress(evt) {
                 if (evt.lengthComputable) {
                     var percentComplete = Math.round(evt.loaded * 100 / evt.total);
-                    status(percentComplete.toString() + "%");
+                    if(percentComplete < 100) {
+                        status(percentComplete.toString() + "%");
+                    }
+                    else {
+                        status('Processing...');
+                    }
+                }
+                else {
+                    console.log("Something went wrong");
                 }
             }
 
@@ -110,6 +118,8 @@
         <form method="POST" enctype="multipart/form-data" action="/records">
             <input type="file" id="upload" name="upload"/><br/>
         </form>
+        <span id="status"></span>
+
         <div class="modal fade" id="checkout">
             <div class="modal-dialog">
                 <div class="modal-content">
