@@ -1,62 +1,86 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
-
-        <style>
-            body {
-                margin: 8px;
-            }
-            .modal-dialog {
-                width: 350px;
-            }
-            .modal-header {
-                border: none;
-                padding: 0;
-            }
-            .modal-content {
-                padding: 10px;
-            }
-        </style>
-
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script src="https://js.stripe.com/v2/"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+
         <script type="application/javascript">
-            function status(message) {
-                $('#status').text(message);
-            }
-
+            Stripe.setPublishableKey('{{stripe_pk}}');
             $(document).ready(function() {
+                document.getElementById('upload').addEventListener('change', function() {
+                    $('#checkout').on('hidden.bs.modal', function(e) {
+                        $('#upload').val('');
+                    }).modal('hide');
 
-                // Check to see when a user has selected a file
-                var timerId;
-                timerId = setInterval(function() {
-                    if($('#upload').val() !== '') {
-                        clearInterval(timerId);
+                    $('#checkout').on('shown.bs.modal', function() {
+                        var file = document.getElementById('upload').files[0];
+                        $('#orderInfo').text('To store ' + file.size / 1000000000 + 'GB');
+                        $('#submit').text('Pay $' + roundPrice(file.size / 1000000000 * {{price}}));
+                    }).modal('show');
 
-                        status('uploading the file ...');
+                    //uploadFile();
+                }, false);
 
-                        uploadFile();
+                var paySubmit = $('#submit');
+                paySubmit.on('click', function() {
+                    paySubmit.prop('disabled', true);
+                    paySubmit.button('progress');
 
-                        $('#checkout').modal('toggle');
-                        //return false;
-                    }
-                }, 500);
+                    setTimeout(function() {
+                        paySubmit.addClass('btn-success').removeClass('btn-primary');
+                        paySubmit.button('success');
+                        $('#checkout').modal('hide');
+                        uploadFile(); //Upload after payment
+                    }, 1500);
+
+                    /*var cardNum = $('#card-num').val();
+                    var cardExp = $('#card-exp').val().split('/');
+                    var cardCVC = $('#card-cvc').val();
+
+                    // First submit the card information to Stripe to get back a token
+                    Stripe.card.createToken({
+                        number: cardNum,
+                        exp_month: cardExp[0],
+                        exp_year: cardExp[1],
+                        cvc: cardCVC
+                    }, function(status, response) {
+                        console.log("Submitted!");
+                        var payForm = $('#form');
+                        var token = response.id;
+
+                        // Save the token into a hidden input field
+                        payForm.append($('<input type="hidden" name="stripeToken" />').val(token));
+
+                        // Now submit the form to our server so it can make the charge against the token
+                        payForm.get(0).submit();
+
+                        // All done!
+                        setTimeout(function() {
+                            $('#checkout').modal('hide');
+                        }, 250);
+                    });*/
+
+                    return false;
+                });
 
             });
 
             function uploadFile() {
                 var fd = new FormData();
-                fd.append("upload", document.getElementById('upload').files[0]);
+                var file = document.getElementById('upload').files[0];
+                fd.append("upload", file);
                 var xhr = new XMLHttpRequest();
                 xhr.upload.addEventListener("progress", uploadProgress, false);
-                xhr.addEventListener("load", uploadComplete, false);
-                xhr.addEventListener("error", uploadFailed, false);
-                xhr.addEventListener("abort", uploadCanceled, false);
                 xhr.open("POST", "/records");
+                xhr.onreadystatechange = function() {
+                    if(xhr.readyState == 4 && xhr.status == 200) {
+                        status("Success!");
+                        document.location.href = '/records/newRecord?id=' + xhr.response.replace(/\"*/g, '');
+                    }
+                };
                 xhr.send(fd);
             }
 
@@ -65,44 +89,37 @@
                     var percentComplete = Math.round(evt.loaded * 100 / evt.total);
                     status(percentComplete.toString() + "%");
                 }
+            }
+
+            function roundPrice(price) {
+                if (price.toFixed(2) <= 0.31) { //31 cents is minimum because of Stripe fees.
+                    return 0.31.toFixed(2); //To keep it at two digits
+                }
                 else {
-                    status("unable to compute");
+                    return price.toFixed(2);
                 }
             }
 
-            function uploadComplete(evt) {
-                /* This event is raised when the server send back a response */
-                status('Success!');
+            function status(message) {
+                $('#status').text(message);
             }
 
-            function uploadFailed(evt) {
-                status("There was an error attempting to upload the file.");
-            }
-
-            function uploadCanceled(evt) {
-                status("The upload has been canceled by the user or the browser dropped the connection.");
-            }
         </script>
     </head>
     <body>
-        <form id="uploadForm"
-              enctype="multipart/form-data"
-              action="/records"
-              method="post">
-            <input type="file" id="upload" name="upload" />
+        <form method="POST" enctype="multipart/form-data" action="/records">
+            <input type="file" id="upload" name="upload"/><br/>
         </form>
-
-        <span id="status" />
-
         <div class="modal fade" id="checkout">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-dismiss="modal" id="closeModal">&times;</button>
                     </div>
 
                     <div class="modal-body">
-                        <form id="form" action="/charge" method="POST" class="form-horizontal">
+                        <span id="orderInfo"></span>
+                        <form id="payForm" action="/charge" method="POST" class="form-horizontal">
                             <div class="form-group">
                                 <div class="col-sm-12">
                                     <div class="input-group">
@@ -141,45 +158,5 @@
                 </div>
             </div>
         </div>
-
-        <script type="text/javascript">
-            Stripe.setPublishableKey('pk_MY_PUBLISHABLE_KEY');
-
-            var $btn = $('#submit');
-            $btn.on('click', function() {
-                $btn.prop('disabled', true);
-                $btn.button('progress');
-
-                var cardNum = $('#card-num').val();
-                var cardExp = $('#card-exp').val().split('/');
-                var cardCVC = $('#card-cvc').val();
-
-                // First submit the card information to Stripe to get back a token
-                Stripe.card.createToken({
-                    number: cardNum,
-                    exp_month: cardExp[0],
-                    exp_year: cardExp[1],
-                    cvc: cardCVC
-                }, function(status, response) {
-                    var $form = $('#form');
-                    var token = response.id;
-
-                    // Save the token into a hidden input field
-                    $form.append($('<input type="hidden" name="stripeToken" />').val(token));
-
-                    // Now submit the form to our server so it can make the charge against the token
-                    $form.get(0).submit();
-
-                    // All done!
-                    $btn.addClass('btn-success').removeClass('btn-primary');
-                    $btn.button('success');
-                    setTimeout(function() {
-                        $('#checkout').modal('hide');
-                    }, 250);
-                });
-
-                return false;
-            });
-        </script>
     </body>
 </html>

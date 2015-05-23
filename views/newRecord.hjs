@@ -1,1 +1,4 @@
-<p>Enter /records/{{id}} to retrieve file</p>
+<body>
+    <p>Your file is now stored at /records/{{id}}</p>
+</body>
+

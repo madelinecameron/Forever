@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>{{title}}</title>
+</head>
+<body>
+<form method="post" id="login">
+    <div class="input-group">
+        <input type="text" name="username" class="form-control" placeholder="Username">
+    </div>
+
+    <div class="input-group">
+        <input type="password" name="password" class="form-control" placeholder="Password">
+                <span class="input-group-addon">
+                    <input type="checkbox" aria-label="Show password">
+                </span>
+    </div>
+
+    <div class="input-group">
+        <button type="submit">Login</button>
+    </div>
+</form>
+</body>
+</html>

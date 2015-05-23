@@ -12,8 +12,9 @@ var Schema = mongoose.Schema;
 var passport_mongoose = require('passport-local-mongoose');
 var LocalStrategy = require('passport-local').Strategy;
 
-var routes = require('./routes/index');
+var index = require('./routes/index');
 var records = require('./routes/records');
+var payment = require('./routes/payment');
 
 var User = require('./models/User');
 
@@ -46,7 +47,8 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.use('/', routes);
+app.use('/', index);
+app.use('/', payment);
 app.use('/records', records);
 app.use('/public', express.static('public'));
 //app.use('/user', user);

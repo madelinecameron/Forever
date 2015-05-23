@@ -5,7 +5,12 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Forever', signedIn: false });
+  if(req.user) {
+    res.render('index', { title: 'Forever', signedIn: true });
+  }
+  else {
+    res.render('index', { title: 'Forever', signedIn: false });
+  }
   console.log(req);
 });
 
@@ -35,4 +40,17 @@ router.post('/login', passport.authenticate('local'), function(req, res, next) {
   res.redirect('/');
 });
 
+router.get('/profile', function(req, res, next) {
+  if(req.user) {
+    User.findOne({ _id: req.user._id }, { files: 1 }, function(err, user) {
+      if(err) console.log(err);
+      else {
+        res.render('profile', {title: 'Forever - Login', records: user.files });
+      }
+    });
+  }
+  else {
+    res.redirect('/');
+  }
+});
 module.exports = router;

@@ -6,7 +6,7 @@ var User = new Schema({
     username: String,
     password: String,
     email: String,
-    files: [String]
+    files: [Schema.Types.Mixed]
 });
 
 User.plugin(passportLocalMongoose);

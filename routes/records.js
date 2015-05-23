@@ -2,6 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var gridFS = require('gridfs-stream');
 var stripe = require('stripe')(process.env.STRIPE_TEST);
+var User = require('../models/User');
 var fs = require('fs');
 
 var router = express.Router();
@@ -19,7 +20,11 @@ connection.once('open', function() {
 router.get('/newRecord', function(req, res, next) {
   console.log("Posting new record");
   console.log(req.query);
-  res.render('newRecord', { id: req.query.id, size: req.query.size, price: (req.query.size * process.env.GIG_PRICE) }); //Don't pass size, change this to retrieve from DB.
+  var size;
+  gridConn.findOne({ _id: req.query.id }, function(err, file) {
+    size = file.length;
+  });
+  res.render('newRecord', { id: req.query.id, size: size, price: (size * process.env.GIG_PRICE) }); //Don't pass size, change this to retrieve from DB.
 });
 
 router.post('/newRecord', function(req, res, next) {
@@ -45,19 +50,27 @@ router.get('/:id', function(req, res, next) {
 });
 
 router.get('/', function(req, res, next) {
-  res.render('records');
+  res.render('records', { price: process.env.GIG_PRICE, stripe_pk: process.env.STRIPE_PK });
 });
 
 
 /* Upload... or something */
 router.post('/', function(req, res, next) {
-  console.log(req.files.upload);
   var writeStream = gridConn.createWriteStream({ content_type: req.files.upload.mimetype });
   fs.createReadStream(req.files.upload.path).pipe(writeStream);
   writeStream.on('close', function(file) {
-    console.log("Success!");
+    if(req.user) {  //If user is logged in
+      User.findOneAndUpdate({ _id: req.user._id }, { $push: { files: { record_id: file._id.toString() } } }, { upsert: true, safe: true }, function(err, user) {
+        console.log(err);
+      });
+    }
+    else {
+      //Ask for email?
+      console.log("no user logged in! :o")
+    }
+    console.log("File successfully uploaded!");
+    res.send(file._id);
   });
-  res.sendStatus(200);
 });
 
 module.exports = router;

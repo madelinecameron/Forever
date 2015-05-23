@@ -5,6 +5,10 @@
     <title>{{title}}</title>
 </head>
 <body>
-
+    <p>
+        {{#records}}
+                /records/{{record_id}} <br/>
+        {{/records}}
+    </p>
 </body>
 </html>
