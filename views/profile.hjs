@@ -9,6 +9,9 @@
         {{#records}}
                 /records/{{record_id}} <br/>
         {{/records}}
+        {{^records}}
+            Upload something! :)
+        {{/records}}
     </p>
 </body>
 </html>
