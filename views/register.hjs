@@ -1,6 +1,20 @@
 <html>
     <head>
         <title>{{title}}</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(function() {
+                $('#showPassword').change(function() {
+                    if ($('#showPassword').is(':checked')) {
+                        //Credit to Alon @ http://stackoverflow.com/questions/3541514/jquery-change-input-type (For IE Fix)
+                        $('#password').clone().attr('type', 'text').insertAfter('#password').prev().remove();
+                    }
+                    else {
+                        $('#password').clone().attr('type', 'password').insertAfter('#password').prev().remove();
+                    }
+                });
+            })
+        </script>
     </head>
     <body>
         <form method="post" id="register">
@@ -9,9 +23,9 @@
             </div>
 
             <div class="input-group">
-                <input type="password" name="password" class="form-control" placeholder="Password">
+                <input type="password" name="password" class="form-control" placeholder="Password" id="password">
                 <span class="input-group-addon">
-                    <input type="checkbox" aria-label="Show password">
+                    <input type="checkbox" aria-label="Show password" id="showPassword">
                 </span>
             </div>
 

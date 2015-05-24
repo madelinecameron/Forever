@@ -4,25 +4,37 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
         <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
 
         <script type="application/javascript">
             Stripe.setPublishableKey('{{stripe_pk}}');
+            var file;
             $(document).ready(function() {
+
                 document.getElementById('upload').addEventListener('change', function() {
-                    $('#checkout').on('hidden.bs.modal', function(e) {
-                        //$('#upload').val('');
+                    var checkout = $('#checkout');
+                    checkout.on('hidden.bs.modal', function(e) {
+                        $('#upload').val('');
                     }).modal('hide');
 
-                    $('#checkout').on('shown.bs.modal', function() {
-                        var file = document.getElementById('upload').files[0];
+                    checkout.on('shown.bs.modal', function() {
+                        file = document.getElementById('upload').files[0];
+                        console.log(file);
                         $('#orderInfo').text();
                         $('#submit').text('Pay $' + roundPrice(file.size / 1000000000 * {{price}}) + ' to store ' + findStorageSuffix(file.size));
                     }).modal('show');
 
                     //uploadFile();
                 }, false);
+
+                $('#dragDropFile').on('click', function() {
+                    $('#upload').trigger('click');
+                });
+
+                document.getElementById('dragDropFile').addEventListener("dragenter", dragEnter, false);
+                document.getElementById('dragDropFile').addEventListener("dragover", dragOver, false);
+                document.getElementById('dragDropFile').addEventListener("drop", drop, false);
 
                 var paySubmit = $('#submit');
                 paySubmit.on('click', function() {
@@ -33,7 +45,7 @@
                         paySubmit.addClass('btn-success').removeClass('btn-primary');
                         paySubmit.button('success');
                         $('#checkout').modal('hide');
-                        uploadFile(); //Upload after payment
+                        uploadFile(file); //Upload after payment
                     }, 1500);
 
                     /*var cardNum = $('#card-num').val();
@@ -68,9 +80,8 @@
 
             });
 
-            function uploadFile() {
+            function uploadFile(file) {
                 var fd = new FormData();
-                var file = document.getElementById('upload').files[0];
                 fd.append("upload", file);
                 var xhr = new XMLHttpRequest();
                 xhr.upload.addEventListener("progress", uploadProgress, false);
@@ -97,6 +108,38 @@
                 else {
                     console.log("Something went wrong");
                 }
+            }
+
+            function dragEnter(e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function dragOver(e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function drop(e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                var dt = e.dataTransfer;
+                console.log(dt);
+                file = dt.files[0];
+                console.log(file);
+
+                var checkout = $('#checkout');
+                checkout.on('hidden.bs.modal', function(e) {
+                    $('#upload').val('');
+                }).modal('hide');
+
+                checkout.on('shown.bs.modal', function() {
+                    $('#orderInfo').text();
+                    $('#submit').text('Pay $' + roundPrice(file.size / 1000000000 * {{price}}) + ' to store ' + findStorageSuffix(file.size));
+                }).modal('show');
+
+                uploadFile(file);
             }
 
             function roundPrice(price) {
@@ -133,9 +176,9 @@
             <div class="row col-md-8" style="position: absolute; top:50%; left:50%;
             width:300px; height:300px; margin-top:-150px; margin-left:-150px">
                 <div>
-                    <img src="../public/images/mtOMptKa.png" class="img-rounded">
+                    <img src="../public/images/cloud_upload.png" class="img-rounded" id="dragDropFile" style="width:300px; height:300px;">
                     <form method="POST" enctype="multipart/form-data" action="/records">
-                        <input type="file" id="upload" name="upload" style="width:100%"/><br/>
+                        <input type="file" id="upload" name="upload" style="width:100%;visibility: hidden"/><br/>
                     </form>
                 </div>
                 <span id="status"></span>
