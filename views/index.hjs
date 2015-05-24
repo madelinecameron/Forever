@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 <div id="banner" class="row page-header">
     <div class="row col-md-12">
-        <div class="col-md-10" style="background-color:red">
+        <div class="col-md-10">
             <h1>Forever</h1>
         </div>
         <div class="col-md-2" style="float:left; bottom: 0">
